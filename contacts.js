@@ -1,25 +1,22 @@
-const fs = require("fs").promises;
-const { error } = require("console");
+const fs = require("fs/promises");
 const path = require("path");
-
+const { v4: uuidv4 } = require("uuid");
 const contactsPath = path.resolve("./db/contacts.json");
 
 async function listContacts() {
   try {
-    const data = await fs.readFile(contactsPath, "utf-8");
-    console.log(JSON.parse(data));
+    const contacts = await fs.readFile(contactsPath, "utf-8");
+    console.log(JSON.parse(contacts));
   } catch (error) {
     console.error(error);
   }
 }
 
-// listContacts();
-
 async function getContactById(contactId) {
   try {
-    const data = await fs.readFile(contactsPath, "utf-8");
-    const contactById = JSON.parse(data).filter(
-      (item) => Number(item.id) === contactId
+    const contacts = await fs.readFile(contactsPath, "utf-8");
+    const [contactById] = JSON.parse(contacts).filter(
+      (contact) => Number(contact.id) === Number(contactId)
     );
     console.log(contactById);
   } catch (error) {
@@ -27,49 +24,46 @@ async function getContactById(contactId) {
   }
 }
 
-// getContactById(5);
-
 async function removeContact(contactId) {
   try {
-    const data = await fs.readFile(contactsPath, "utf-8");
-    const parsedData = JSON.parse(data);
-    const index = parsedData.findIndex((item) => Number(item.id) === contactId);
-    parsedData.splice(index, 1);
-    const newList = JSON.stringify([...parsedData]);
+    const contacts = await fs.readFile(contactsPath, "utf-8");
+    const parsedContacts = JSON.parse(contacts);
+    const index = parsedContacts.findIndex(
+      (contact) => Number(contact.id) === Number(contactId)
+    );
+    parsedContacts.splice(index, 1);
 
-    await fs.writeFile(contactsPath, newList);
-    const newData = await fs.readFile(contactsPath, "utf-8");
-    console.log(JSON.parse(newData));
+    await fs.writeFile(contactsPath, JSON.stringify(parsedContacts));
+    const newContacts = await fs.readFile(contactsPath, "utf-8");
+    console.log(JSON.parse(newContacts));
   } catch (error) {
     console.error(error);
   }
 }
 
-// removeContact(11);
-
 async function addContact(name, email, phone) {
   try {
-    const data = await fs.readFile(contactsPath, "utf-8");
-    const parsedData = JSON.parse(data);
-    const lastIndex = parsedData.length;
+    const contacts = await fs.readFile(contactsPath, "utf-8");
     const newContact = [
       {
-        id: `${lastIndex + 1}`,
+        id: uuidv4(),
         name,
         email,
         phone,
       },
     ];
-    const newList = JSON.stringify([...parsedData, ...newContact]);
-    await fs.writeFile(contactsPath, newList);
-    const newData = await fs.readFile(contactsPath, "utf-8");
-    console.log(JSON.parse(newData));
+
+    await fs.writeFile(
+      contactsPath,
+      JSON.stringify([...JSON.parse(contacts), ...newContact])
+    );
+
+    const newContacts = await fs.readFile(contactsPath, "utf-8");
+    console.log(JSON.parse(newContacts));
   } catch (error) {
     console.error(error);
   }
 }
-
-// addContact("Alla Yukhymenko", "magnolia@rambler.com", "(038) 678-6789");
 
 module.exports = {
   listContacts,

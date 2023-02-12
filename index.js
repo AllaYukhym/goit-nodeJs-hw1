@@ -1,10 +1,43 @@
-const contacts = require("./contacts");
+const {
+  listContacts,
+  getContactById,
+  addContact,
+  removeContact,
+} = require("./contacts");
+const { Command } = require("commander");
+const program = new Command();
+program
+  .option("-a, --action <type>", "choose action")
+  .option("-i, --id <type>", "user id")
+  .option("-n, --name <type>", "user name")
+  .option("-e, --email <type>", "user email")
+  .option("-p, --phone <type>", "user phone");
 
-// contacts.listContacts();
-// contacts.getContactById(5);
-// contacts.addContact(
-//   "Alla Yukhymenko",
-//   "magnolia@rambler.com",
-//   "(038) 678-6789"
-// );
-// contacts.removeContact(11);
+program.parse(process.argv);
+
+const argv = program.opts();
+
+function invokeAction({ action, id, name, email, phone }) {
+  switch (action) {
+    case "list":
+      listContacts();
+      break;
+
+    case "get":
+      getContactById(id);
+      break;
+
+    case "add":
+      addContact(name, email, phone);
+      break;
+
+    case "remove":
+      removeContact(id);
+      break;
+
+    default:
+      console.warn("\x1B[31m Unknown action type!");
+  }
+}
+
+invokeAction(argv);
